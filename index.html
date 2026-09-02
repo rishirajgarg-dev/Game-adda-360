@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111827" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Game Zone Manager</title>
+  <style>
+    :root{--bg:#0b1020;--panel:#121a2d;--panel2:#17223a;--text:#eef2ff;--muted:#98a2b3;--accent:#7c3aed;--green:#16a34a;--red:#dc2626;--amber:#d97706;--line:#26324b;--card:#101827;--shadow:0 10px 30px rgba(0,0,0,.25)}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#080d19 0%,#0b1020 100%);color:var(--text)}
+    button,input,select{font:inherit}.app{min-height:100vh}.topbar{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:rgba(9,14,27,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:12px}.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);display:grid;place-items:center;font-size:22px;box-shadow:var(--shadow)}
+    .brand h1{font-size:18px;margin:0}.brand small{color:var(--muted)}.top-actions{display:flex;gap:8px}
+    .btn{border:none;border-radius:10px;padding:10px 14px;cursor:pointer;color:#fff;background:#26324b;font-weight:700}.btn:hover{filter:brightness(1.08)}.btn.primary{background:linear-gradient(135deg,#7c3aed,#5b21b6)}.btn.green{background:var(--green)}.btn.red{background:var(--red)}.btn.amber{background:var(--amber)}.btn.ghost{background:transparent;border:1px solid var(--line)}.btn.sm{padding:7px 10px;font-size:13px}
+    .layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 73px)}.sidebar{padding:18px 12px;border-right:1px solid var(--line);background:#0b1222}.navbtn{width:100%;display:flex;align-items:center;gap:10px;padding:12px;border:0;border-radius:10px;background:transparent;color:#cbd5e1;cursor:pointer;text-align:left;margin-bottom:6px}.navbtn.active,.navbtn:hover{background:#18233b;color:#fff}.main{padding:22px;max-width:1500px;width:100%}.view{display:none}.view.active{display:block}
+    .pagehead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.pagehead h2{margin:0 0 4px;font-size:24px}.pagehead p{margin:0;color:var(--muted)}
+    .stats{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:12px;margin-bottom:18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}.stat .label{color:var(--muted);font-size:13px}.stat .value{font-size:25px;font-weight:800;margin-top:6px}.stat .sub{font-size:12px;color:var(--muted);margin-top:5px}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px}.station{background:linear-gradient(180deg,#121a2d,#0f1728);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}.station.free{border-color:#1f7a43}.station.busy{border-color:#6d28d9}.station.warning{border-color:#d97706}.station .row{display:flex;justify-content:space-between;gap:10px;align-items:center}.station h3{margin:0;font-size:18px}.badge{padding:5px 8px;border-radius:999px;font-size:11px;font-weight:800}.badge.free{background:#133a25;color:#7ee2a8}.badge.busy{background:#31205b;color:#c4b5fd}.badge.warning{background:#4a2c0e;color:#fdba74}.meta{color:var(--muted);font-size:13px;margin-top:10px}.timer{font-size:28px;font-weight:900;letter-spacing:.5px;margin:14px 0 10px}.bill{font-weight:800;margin:8px 0 12px}.station .actions{display:flex;flex-wrap:wrap;gap:7px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}.panel h3{margin-top:0}.formgrid{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:14px}.field label{display:block;font-size:13px;color:#cbd5e1;margin-bottom:7px}.field input,.field select{width:100%;padding:11px 12px;border-radius:10px;border:1px solid #344057;background:#0d1527;color:#fff;outline:none}.field input:focus,.field select:focus{border-color:#7c3aed}.hint{color:var(--muted);font-size:12px;margin-top:5px}.section-title{font-weight:800;margin:20px 0 10px}
+    .player-list{display:grid;gap:14px}.player-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card)}.player-card .player-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}.player-card .player-head strong{font-size:16px}.player-totals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.player-total-box{background:#0d1527;border:1px solid var(--line);border-radius:10px;padding:10px}.player-total-box span{display:block;color:var(--muted);font-size:11px}.player-total-box b{display:block;margin-top:4px}.player-card details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.player-card summary{cursor:pointer;font-weight:800;color:#c4b5fd}.player-bill-grid{display:grid;grid-template-columns:1.4fr repeat(3,minmax(90px,.7fr));gap:8px;align-items:center}.bill-player{border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px;background:var(--card)}
+    .menu{display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:10px}.snack{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card)}.snack .name{font-weight:800}.snack .price{color:#a78bfa;font-weight:800;margin-top:4px}.qty{display:flex;align-items:center;gap:8px;margin-top:10px}.qty button{width:30px;height:30px;border:0;border-radius:8px;background:#25314a;color:#fff;cursor:pointer}.qty span{min-width:22px;text-align:center;font-weight:800}
+    .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px}.table{width:100%;border-collapse:collapse;min-width:850px}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}.table th{background:#10182b;color:#cbd5e1;position:sticky;top:0}.table tr:last-child td{border-bottom:none}.muted{color:var(--muted)}
+    .modalback{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}.modalback.show{display:flex}.modal{width:min(760px,96vw);max-height:92vh;overflow:auto;background:#0f1728;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 30px 70px rgba(0,0,0,.45)}.modal h3{margin-top:0}.modalfooter{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.summary{display:grid;grid-template-columns:1fr auto;gap:8px 18px;padding-top:12px;border-top:1px solid var(--line)}.summary .grand{font-size:20px;font-weight:900}.receipt{background:white;color:#111;padding:20px;border-radius:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.receipt h2{text-align:center;margin:0}.receipt .center{text-align:center}.receipt hr{border:0;border-top:1px dashed #555}.receipt table{width:100%;border-collapse:collapse}.receipt td{padding:4px 0}.receipt .right{text-align:right}
+    .toast{position:fixed;right:18px;bottom:18px;background:#111827;border:1px solid var(--line);color:#fff;padding:12px 14px;border-radius:10px;box-shadow:var(--shadow);display:none;z-index:200}.toast.show{display:block}.dangerzone{border-color:#6b1d2c}.dangerzone h3{color:#fca5a5}
+    @media(max-width:1100px){.stats{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.menu{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:760px){.player-totals{grid-template-columns:1fr}.player-bill-grid{grid-template-columns:1fr}.layout{grid-template-columns:1fr}.sidebar{display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px;position:sticky;top:73px;z-index:15}.navbtn{white-space:nowrap;width:auto;margin:0 5px}.main{padding:14px}.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.menu{grid-template-columns:repeat(2,1fr)}.topbar{padding:12px}.brand small{display:none}.pagehead{flex-direction:column}.top-actions .btn.ghost{display:none}}
+    @media print{body *{visibility:hidden}.receipt,.receipt *{visibility:visible}.receipt{position:absolute;left:0;top:0;width:100%;box-shadow:none}.modal{border:0;box-shadow:none}.modalback{position:static;background:white}.modalfooter{display:none!important}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="logo">🎮</div><div><h1>Game Zone Manager</h1><small>Console • Snacks • Billing</small></div></div>
+    <div class="top-actions"><button class="btn ghost" onclick="showView('settings')">⚙ Settings</button><button class="btn primary" onclick="showView('new')">+ New Session</button></div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar">
+      <button class="navbtn active" data-view="dashboard" onclick="showView('dashboard')">🏠 Dashboard</button>
+      <button class="navbtn" data-view="new" onclick="showView('new')">➕ New Session</button>
+      <button class="navbtn" data-view="active" onclick="showView('active')">⏱ Active Sessions</button>
+      <button class="navbtn" data-view="history" onclick="showView('history')">🧾 History</button>
+      <button class="navbtn" data-view="reports" onclick="showView('reports')">📊 Reports</button>
+      <button class="navbtn" data-view="inventory" onclick="showView('inventory')">🍟 Snacks Stock</button>
+      <button class="navbtn" data-view="online" onclick="showView('online')">💻 Online</button>
+      <button class="navbtn" data-view="udhar" onclick="showView('udhar')">📒 Udhar</button>
+      <button class="navbtn" data-view="jama" onclick="showView('jama')">✅ Jama</button>
+      <button class="navbtn" data-view="settings" onclick="showView('settings')">⚙ Settings</button>
+    </aside>
+    <main class="main">
+      <section class="view active" id="view-dashboard">
+        <div class="pagehead"><div><h2>Live Dashboard</h2><p id="todayLabel"></p></div><button class="btn primary" onclick="showView('new')">+ Start Session</button></div>
+        <div class="stats" id="stats"></div>
+        <div class="grid" id="stationGrid"></div>
+      </section>
+
+      <section class="view" id="view-new">
+        <div class="pagehead"><div><h2>New Customer Entry</h2><p>Register ke bina session start karein.</p></div></div>
+        <div class="panel">
+          <div class="formgrid">
+            <div class="field"><label>No. of Players *</label><select id="playerCount"><option value="1">1 Player</option><option value="2">2 Players</option><option value="3">3 Players</option><option value="4">4 Players</option></select></div>
+            <div class="field"><label>Gaming Station *</label><select id="stationSelect"></select></div>
+            <div class="field"><label>Duration *</label><select id="durationSelect"><option value="5">5 Minutes</option><option value="10">10 Minutes</option><option value="15">15 Minutes</option><option value="20">20 Minutes</option><option value="25">25 Minutes</option><option value="30">30 Minutes</option><option value="35">35 Minutes</option><option value="40">40 Minutes</option><option value="45">45 Minutes</option><option value="50">50 Minutes</option><option value="55">55 Minutes</option><option value="60" selected>1 Hour</option></select><div class="hint">5-minute interval. Rate hourly price ke proportion se auto-calculate hota hai.</div></div>
+            <div class="field"><label>Total Gaming Charge</label><input id="gameCharge" readonly /></div>
+            <div class="field"><label>Start Time *</label><input id="startTimePreview" type="time" step="60" /><div class="hint">Time manually select karein. Sab players ka countdown same rahega.</div></div>
+          </div>
+          <div class="section-title">Player-wise Details & Separate Billing</div>
+          <div class="hint" style="margin-bottom:12px">Har player ka naam, optional mobile aur snacks alag enter karein. Gaming charge per player automatically add hoga.</div>
+          <div class="player-list" id="playerDetails"></div>
+          <div class="summary" style="max-width:420px;margin-left:auto;margin-top:18px"><div>Gaming (all players)</div><div id="newGamingTotal">₹0</div><div>Snacks (all players)</div><div id="newSnacksTotal">₹0</div><div class="grand">Group Total</div><div class="grand" id="newGrandTotal">₹0</div></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn green" onclick="startSession()">▶ Start Session</button></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-active">
+        <div class="pagehead"><div><h2>Active Sessions</h2><p>Live timer, extra time, snacks aur billing.</p></div></div>
+        <div class="tablewrap"><table class="table"><thead><tr><th>Station</th><th>Customer</th><th>Start</th><th>Duration</th><th>Remaining</th><th>Current Bill</th><th>Actions</th></tr></thead><tbody id="activeTable"></tbody></table></div>
+      </section>
+
+      <section class="view" id="view-history">
+        <div class="pagehead"><div><h2>Session History</h2><p>Completed bills aur payment records.</p></div><button class="btn ghost" onclick="exportCSV()">Export CSV</button></div>
+        <div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Customer</th><th>Station</th><th>Gaming</th><th>Snacks</th><th>Total</th><th>Payment</th><th>Mode</th><th>Receipt</th></tr></thead><tbody id="historyTable"></tbody></table></div>
+      </section>
+
+      <section class="view" id="view-reports">
+        <div class="pagehead"><div><h2>Reports</h2><p>Daily/monthly sales snapshot.</p></div></div>
+        <div class="panel"><div class="formgrid"><div class="field"><label>Report Date</label><input type="date" id="reportDate" onchange="renderReports()" /></div></div></div>
+        <div class="stats" id="reportStats"></div>
+        <div class="panel"><h3>Console Revenue</h3><div class="tablewrap"><table class="table"><thead><tr><th>Console Type</th><th>Sessions</th><th>Gaming Revenue</th></tr></thead><tbody id="consoleReport"></tbody></table></div></div>
+        <div class="panel"><h3>Snack Sales</h3><div class="tablewrap"><table class="table"><thead><tr><th>Item</th><th>Qty Sold</th><th>Revenue</th></tr></thead><tbody id="snackReport"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="view-inventory">
+        <div class="pagehead"><div><h2>Snacks Stock</h2><p>Optional inventory tracking. Quantity edit karke save karein.</p></div></div>
+        <div class="panel"><div class="tablewrap"><table class="table"><thead><tr><th>Item</th><th>Price</th><th>Stock Qty</th><th>Sold</th><th>Low Stock</th></tr></thead><tbody id="inventoryTable"></tbody></table></div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn green" onclick="saveInventory()">Save Stock</button></div></div>
+      </section>
+
+      <section class="view" id="view-online">
+        <div class="pagehead"><div><h2>Online Payments</h2><p>UPI / Card / Online paid bills ka separate record.</p></div><button class="btn ghost" onclick="exportOnlineCSV()">Export CSV</button></div>
+        <div class="stats" id="onlineStats"></div>
+        <div class="panel"><h3>Online Payment History</h3><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Customer</th><th>Mobile</th><th>Station</th><th>Mode</th><th>Amount</th><th>Bill</th></tr></thead><tbody id="onlineHistoryTable"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="view-udhar">
+        <div class="pagehead"><div><h2>Udhar</h2><p>Customer ko diya gaya credit aur outstanding balance.</p></div><button class="btn ghost" onclick="exportLedgerCSV('Udhar')">Export CSV</button></div>
+        <div class="stats" id="udharStats"></div>
+        <div class="panel">
+          <h3>+ New Udhar Entry</h3>
+          <div class="formgrid">
+            <div class="field"><label>Customer Name *</label><input id="udharName" placeholder="e.g. Rahul" /></div>
+            <div class="field"><label>Mobile No.</label><input id="udharPhone" inputmode="numeric" placeholder="Optional" /></div>
+            <div class="field"><label>Amount *</label><input id="udharAmount" type="number" min="1" step="1" placeholder="₹ Amount" /></div>
+            <div class="field"><label>Date</label><input id="udharDate" type="date" /></div>
+            <div class="field"><label>Note</label><input id="udharNote" placeholder="Reason / session note" /></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn amber" onclick="addLedgerEntry('Udhar')">+ Add Udhar</button></div>
+        </div>
+        <div class="panel"><h3>Outstanding Customers</h3><div class="tablewrap"><table class="table"><thead><tr><th>Customer</th><th>Mobile</th><th>Total Udhar</th><th>Total Jama</th><th>Amount Due</th></tr></thead><tbody id="udharBalanceTable"></tbody></table></div></div>
+        <div class="panel"><h3>Udhar History</h3><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Customer</th><th>Mobile</th><th>Amount</th><th>Note</th><th>Action</th></tr></thead><tbody id="udharHistoryTable"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="view-jama">
+        <div class="pagehead"><div><h2>Jama</h2><p>Udhar recovery / customer se received amount ka separate record.</p></div><button class="btn ghost" onclick="exportLedgerCSV('Jama')">Export CSV</button></div>
+        <div class="stats" id="jamaStats"></div>
+        <div class="panel">
+          <h3>+ New Jama Entry</h3>
+          <div class="formgrid">
+            <div class="field"><label>Customer Name *</label><input id="jamaName" placeholder="e.g. Rahul" /></div>
+            <div class="field"><label>Mobile No.</label><input id="jamaPhone" inputmode="numeric" placeholder="Optional" /></div>
+            <div class="field"><label>Amount Received *</label><input id="jamaAmount" type="number" min="1" step="1" placeholder="₹ Amount" /></div>
+            <div class="field"><label>Date</label><input id="jamaDate" type="date" /></div>
+            <div class="field"><label>Note</label><input id="jamaNote" placeholder="Cash / online recovery note" /></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn green" onclick="addLedgerEntry('Jama')">+ Add Jama</button></div>
+        </div>
+        <div class="panel"><h3>Current Customer Balances</h3><div class="tablewrap"><table class="table"><thead><tr><th>Customer</th><th>Mobile</th><th>Total Udhar</th><th>Total Jama</th><th>Balance</th></tr></thead><tbody id="jamaBalanceTable"></tbody></table></div></div>
+        <div class="panel"><h3>Jama History</h3><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Customer</th><th>Mobile</th><th>Amount</th><th>Note</th><th>Action</th></tr></thead><tbody id="jamaHistoryTable"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="view-settings">
+        <div class="pagehead"><div><h2>Settings</h2><p>Rates already aapke current pricing ke hisaab se configured hain.</p></div></div>
+        <div class="panel"><h3>Gaming Rates</h3><p class="muted">5–55 minute charges 1-hour rate ke proportion se nearest rupee me auto-calculate hote hain. 30 min aur 1 hour ke original rates unchanged hain.</p><div class="tablewrap"><table class="table"><thead><tr><th>System</th><th>5 Min</th><th>15 Min</th><th>30 Min</th><th>45 Min</th><th>1 Hour</th></tr></thead><tbody id="rateTable"></tbody></table></div></div>
+        <div class="panel"><h3>Cafe Details</h3><div class="formgrid"><div class="field"><label>Game Zone Name</label><input id="cafeName" /></div><div class="field"><label>Phone / Counter Contact</label><input id="cafePhone" /></div><div class="field"><label>Address</label><input id="cafeAddress" /></div></div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn green" onclick="saveCafeSettings()">Save Details</button></div></div>
+        <div class="panel dangerzone"><h3>Data Backup / Reset</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" onclick="backupData()">Download Backup</button><label class="btn ghost" style="cursor:pointer">Restore Backup<input type="file" accept="application/json" style="display:none" onchange="restoreData(event)" /></label><button class="btn red" onclick="resetAll()">Reset All Data</button></div><p class="muted">Data isi browser/device ke local storage me save hota hai. Regular backup recommended.</p></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="modalback" id="sessionModal"><div class="modal" id="sessionModalContent"></div></div>
+<div class="modalback" id="billModal"><div class="modal" id="billModalContent"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_CONFIG={
+  stations:[
+    {id:'PS5-01',type:'PS5'},{id:'PS4-01',type:'PS4'},{id:'PS4-02',type:'PS4'},
+    {id:'XBOX-01',type:'Xbox 360'},{id:'XBOX-02',type:'Xbox 360'},{id:'XBOX-03',type:'Xbox 360'},{id:'XBOX-04',type:'Xbox 360'},
+    {id:'SIM-01',type:'Sim Racing'}
+  ],
+  rates:{'PS5':{30:50,60:100},'PS4':{30:30,60:60},'Xbox 360':{30:20,60:40},'Sim Racing':{30:50,60:100}},
+  snacks:[
+    {id:'cold',name:'Cold Drink',price:20,stock:0},{id:'chips5',name:'Chips ₹5',price:5,stock:0},{id:'chips10',name:'Chips ₹10',price:10,stock:0},
+    {id:'plainmaggi',name:'Plain Maggi',price:35,stock:0},{id:'vegmaggi',name:'Veg Maggi',price:45,stock:0},{id:'cheesemaggi',name:'Cheese Maggi',price:60,stock:0},
+    {id:'vegsandwich',name:'Veg Sandwich',price:45,stock:0},{id:'cheesesandwich',name:'Cheese Sandwich',price:60,stock:0}
+  ],
+  cafe:{name:'GAME ZONE',phone:'',address:''}
+};
+let data=loadData();
+let newPlayerState=[];
+let modalSessionId=null;
+let modalPlayerIdx=0;
+function loadData(){
+  const saved=localStorage.getItem('gameZoneManagerV1');
+  const fresh={config:structuredClone(DEFAULT_CONFIG),active:[],history:[],inventorySold:{},ledger:[]};
+  if(!saved)return fresh;
+  try{return migrateData(JSON.parse(saved))}catch{return fresh}
+}
+function saveData(){localStorage.setItem('gameZoneManagerV1',JSON.stringify(data));}
+function money(n){return '₹'+Number(n||0).toFixed(0)}
+function fmtTime(ts){return new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+function fmtDate(ts){return new Date(ts).toLocaleDateString('en-IN')}
+function dateKey(ts){const d=new Date(ts);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function showView(name){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+name).classList.add('active');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===name));if(name==='new')renderNew();if(name==='active')renderActive();if(name==='history')renderHistory();if(name==='reports')renderReports();if(name==='inventory')renderInventory();if(name==='online')renderOnline();if(name==='udhar')renderUdhar();if(name==='jama')renderJama();if(name==='settings')renderSettings();if(name==='dashboard')renderDashboard();window.scrollTo({top:0,behavior:'smooth'})}
+function getStation(id){return data.config.stations.find(s=>s.id===id)}
+function rateFor(type,mins){
+  const r=data.config.rates?.[type]||{};
+  if(Number.isFinite(Number(r[mins])))return Number(r[mins]);
+  const hourly=Number(r[60]||0);
+  return Math.round(hourly*Number(mins||0)/60);
+}
+function activeForStation(id){return data.active.find(s=>s.stationId===id)}
+function cloneSnacks(items){return (items||[]).map(x=>({id:x.id,name:x.name,price:Number(x.price||0),qty:Math.max(0,Number(x.qty||0))})).filter(x=>x.qty>0)}
+function migrateData(obj){
+  if(!obj||!obj.config)obj={config:structuredClone(DEFAULT_CONFIG),active:[],history:[],inventorySold:{},ledger:[]};
+  obj.active=Array.isArray(obj.active)?obj.active:[];obj.history=Array.isArray(obj.history)?obj.history:[];obj.inventorySold=obj.inventorySold||{};obj.ledger=Array.isArray(obj.ledger)?obj.ledger:[];
+  obj.config.rates=obj.config.rates||structuredClone(DEFAULT_CONFIG.rates);obj.config.stations=obj.config.stations||structuredClone(DEFAULT_CONFIG.stations);obj.config.snacks=obj.config.snacks||structuredClone(DEFAULT_CONFIG.snacks);obj.config.cafe=obj.config.cafe||structuredClone(DEFAULT_CONFIG.cafe);
+  [...obj.active,...obj.history].forEach(normalizeSessionPlayers);
+  return obj;
+}
+function normalizeSessionPlayers(s){
+  const oldCount=Math.max(1,Number(s.playerCount||1));
+  if(!Array.isArray(s.players)||!s.players.length){
+    const others=String(s.otherPlayers||'').split(',').map(x=>x.trim()).filter(Boolean);
+    const names=[s.customerName||'Player 1',...others];while(names.length<oldCount)names.push(`Player ${names.length+1}`);
+    const totalGaming=Number(s.gamingCharge??s.gamingTotal??0);const perGaming=oldCount?totalGaming/oldCount:totalGaming;
+    s.players=Array.from({length:oldCount},(_,i)=>({id:uid(),name:names[i]||`Player ${i+1}`,phone:i===0?(s.phone||''):'',gamingCharge:perGaming,snacks:i===0?cloneSnacks(s.snacks):[],paymentStatus:s.paymentStatus||'Paid',paymentMode:s.paymentMode||'Cash'}));
+  }else{
+    s.players=s.players.map((p,i)=>({id:p.id||uid(),name:String(p.name||`Player ${i+1}`),phone:String(p.phone||''),gamingCharge:Number(p.gamingCharge||0),snacks:cloneSnacks(p.snacks),paymentStatus:p.paymentStatus||s.paymentStatus||'Paid',paymentMode:p.paymentMode||s.paymentMode||'Cash'}));
+  }
+  syncLegacyFields(s);return s;
+}
+function allSessionSnacks(s){
+  const map=new Map();(s.players||[]).forEach(p=>(p.snacks||[]).forEach(x=>{const cur=map.get(x.id)||{id:x.id,name:x.name,price:Number(x.price||0),qty:0};cur.qty+=Number(x.qty||0);map.set(x.id,cur)}));
+  return [...map.values()].filter(x=>x.qty>0);
+}
+function playerTotals(p){const gaming=Number(p?.gamingCharge||0);const snacks=(p?.snacks||[]).reduce((a,x)=>a+Number(x.price||0)*Number(x.qty||0),0);return {gaming,snacks,total:gaming+snacks}}
+function syncLegacyFields(s){
+  if(!Array.isArray(s.players)||!s.players.length)return s;
+  s.playerCount=s.players.length;s.customerName=s.players[0].name;s.phone=s.players[0].phone||'';s.otherPlayers=s.players.slice(1).map(p=>p.name).join(', ');
+  s.gamingCharge=s.players.reduce((a,p)=>a+Number(p.gamingCharge||0),0);s.snacks=allSessionSnacks(s);
+  if(s.endTs){const t=sessionTotals(s);s.gamingTotal=t.gaming;s.snacksTotal=t.snacks;s.total=t.total;const statuses=s.players.map(p=>p.paymentStatus||'Pending');const modes=s.players.map(p=>p.paymentMode||'Other');s.paymentStatus=statuses.every(x=>x===statuses[0])?statuses[0]:'Mixed';s.paymentMode=modes.every(x=>x===modes[0])?modes[0]:'Mixed'}
+  return s;
+}
+function playerCountOf(s){return Array.isArray(s.players)&&s.players.length?s.players.length:Math.max(1,Number(s.playerCount||1))}
+function customerLabel(s){const n=playerCountOf(s);const name=Array.isArray(s.players)&&s.players.length?s.players[0].name:s.customerName;return `${escapeHtml(name||'Customer')}${n>1?` +${n-1}`:''}`}
+function manualStartTimestamp(timeValue){
+  if(!/^\d{2}:\d{2}$/.test(timeValue||''))return null;
+  const [h,m]=timeValue.split(':').map(Number);
+  const now=new Date();
+  const d=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m,0,0);
+  if(now.getHours()<6 && h>=19)d.setDate(d.getDate()-1);
+  return d.getTime();
+}
+function sessionTotals(s){if(Array.isArray(s.players)&&s.players.length){return s.players.reduce((a,p)=>{const t=playerTotals(p);a.gaming+=t.gaming;a.snacks+=t.snacks;a.total+=t.total;return a},{gaming:0,snacks:0,total:0})}const gaming=Number(s.gamingCharge||s.gamingTotal||0),snacks=(s.snacks||[]).reduce((a,x)=>a+x.price*x.qty,0);return {gaming,snacks,total:gaming+snacks}}
+function pendingAmount(s){if(Array.isArray(s.players)&&s.players.length)return s.players.reduce((a,p)=>a+(p.paymentStatus==='Pending'?playerTotals(p).total:0),0);return s.paymentStatus==='Pending'?sessionTotals(s).total:0}
+function remainingMs(s){return (s.startTs+s.durationMin*60000)-Date.now()}
+function remainingText(s){let ms=remainingMs(s);const overdue=ms<0;ms=Math.abs(ms);const m=Math.floor(ms/60000),sec=Math.floor((ms%60000)/1000);return `${overdue?'+':''}${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}${overdue?' overdue':''}`}
+function renderDashboard(){
+  document.getElementById('todayLabel').textContent=new Date().toLocaleString('en-IN',{dateStyle:'full',timeStyle:'short'});
+  const today=dateKey(Date.now());const todayH=data.history.filter(x=>dateKey(x.endTs)===today);const rev=todayH.reduce((a,x)=>a+sessionTotals(x).total,0);
+  const todayPlayers=todayH.reduce((a,x)=>a+playerCountOf(x),0);
+  const onlineToday=onlinePaymentEntries().filter(x=>x.date===today).reduce((a,x)=>a+x.amount,0);
+  const udharToday=(data.ledger||[]).filter(x=>x.type==='Udhar'&&entryDateKey(x)===today).reduce((a,x)=>a+Number(x.amount||0),0);
+  const jamaToday=(data.ledger||[]).filter(x=>x.type==='Jama'&&entryDateKey(x)===today).reduce((a,x)=>a+Number(x.amount||0),0);
+  const outstanding=ledgerGroups().reduce((a,g)=>a+Math.max(0,g.balance),0);
+  document.getElementById('stats').innerHTML=[['Active Sessions',data.active.length,`${8-data.active.length} stations free`],['Today Customers',todayPlayers,`${todayH.length} completed sessions`],['Today Sales',money(rev),'gross billing'],['Online',money(onlineToday),'received today'],['Udhar',money(udharToday),`today • due ${money(outstanding)}`],['Jama',money(jamaToday),'received against udhar'],['Snack Revenue',money(todayH.reduce((a,x)=>a+sessionTotals(x).snacks,0)),'today']].map(([l,v,s])=>`<div class="stat"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`).join('');
+  document.getElementById('stationGrid').innerHTML=data.config.stations.map(st=>{const s=activeForStation(st.id);if(!s)return `<div class="station free"><div class="row"><h3>${st.id}</h3><span class="badge free">FREE</span></div><div class="meta">${st.type}</div><div class="timer">Available</div><div class="actions"><button class="btn green sm" onclick="quickStart('${st.id}')">Start Session</button></div></div>`;const rem=remainingMs(s);const cls=rem<=5*60000?'warning':'busy';const totals=sessionTotals(s);return `<div class="station ${cls}"><div class="row"><h3>${st.id}</h3><span class="badge ${cls}">${rem<0?'OVERTIME':'ACTIVE'}</span></div><div class="meta">${st.type} • ${customerLabel(s)} • 👥 ${playerCountOf(s)}</div><div class="timer">${remainingText(s)}</div><div class="meta">Started ${fmtTime(s.startTs)} • ${s.durationMin} min</div><div class="bill">Current Bill: ${money(totals.total)}</div><div class="actions"><button class="btn primary sm" onclick="openSession('${s.id}')">Manage</button><button class="btn red sm" onclick="openEndBill('${s.id}')">End & Bill</button></div></div>`}).join('')
+}
+function quickStart(stationId){showView('new');document.getElementById('stationSelect').value=stationId;captureNewPlayerInputs();renderPlayerSections();updateNewPrice()}
+function blankNewPlayer(){return {name:'',phone:'',snacks:{}}}
+function captureNewPlayerInputs(){newPlayerState.forEach((p,i)=>{const n=document.getElementById('pname-'+i),ph=document.getElementById('pphone-'+i);if(n)p.name=n.value.trim();if(ph)p.phone=ph.value.trim()})}
+function resizeNewPlayers(){captureNewPlayerInputs();const n=Math.max(1,Number(document.getElementById('playerCount').value||1));while(newPlayerState.length<n)newPlayerState.push(blankNewPlayer());newPlayerState=newPlayerState.slice(0,n);renderPlayerSections();updateNewPrice()}
+function renderNew(){
+  newPlayerState=[blankNewPlayer()];const free=data.config.stations.filter(s=>!activeForStation(s.id));document.getElementById('stationSelect').innerHTML=free.length?free.map(s=>`<option value="${s.id}">${s.id} — ${s.type}</option>`).join(''):'<option value="">No station available</option>';
+  document.getElementById('startTimePreview').value='';document.getElementById('playerCount').value='1';renderPlayerSections();updateNewPrice();
+}
+function renderPlayerSections(){
+  const root=document.getElementById('playerDetails');if(!root)return;const sid=document.getElementById('stationSelect').value,st=getStation(sid),mins=Number(document.getElementById('durationSelect').value),base=st?rateFor(st.type,mins):0;
+  root.innerHTML=newPlayerState.map((p,i)=>`<div class="player-card"><div class="player-head"><strong>👤 Player ${i+1}${i===0?' (Primary)':''}</strong><span class="badge busy">Gaming ${money(base)}</span></div><div class="formgrid"><div class="field"><label>Player Name *</label><input id="pname-${i}" value="${escapeHtml(p.name)}" placeholder="e.g. ${i===0?'Rahul':'Aman'}" /></div><div class="field"><label>Mobile No.</label><input id="pphone-${i}" inputmode="numeric" value="${escapeHtml(p.phone)}" placeholder="Optional" /></div></div><details><summary>+ Add Snacks for Player ${i+1}</summary><div class="menu" style="margin-top:10px">${data.config.snacks.map(x=>`<div class="snack"><div class="name">${x.name}</div><div class="price">${money(x.price)}</div><div class="qty"><button type="button" onclick="changeNewPlayerSnack(${i},'${x.id}',-1)">−</button><span id="pnq-${i}-${x.id}">${p.snacks[x.id]||0}</span><button type="button" onclick="changeNewPlayerSnack(${i},'${x.id}',1)">+</button></div></div>`).join('')}</div></details><div class="player-totals"><div class="player-total-box"><span>Gaming</span><b id="pgame-${i}">${money(base)}</b></div><div class="player-total-box"><span>Snacks</span><b id="psnack-${i}">${money(0)}</b></div><div class="player-total-box"><span>Player Bill</span><b id="ptotal-${i}">${money(base)}</b></div></div></div>`).join('');updateNewTotals();
+}
+function changeNewPlayerSnack(i,id,d){const p=newPlayerState[i];if(!p)return;p.snacks[id]=Math.max(0,Number(p.snacks[id]||0)+d);const el=document.getElementById(`pnq-${i}-${id}`);if(el)el.textContent=p.snacks[id];updateNewTotals()}
+function updateNewPrice(){const sid=document.getElementById('stationSelect').value,mins=Number(document.getElementById('durationSelect').value),players=Math.max(1,Number(document.getElementById('playerCount').value||1)),st=getStation(sid),base=st?rateFor(st.type,mins):0;document.getElementById('gameCharge').value=money(base*players);newPlayerState.forEach((_,i)=>{const el=document.getElementById('pgame-'+i);if(el)el.textContent=money(base)});updateNewTotals()}
+function updateNewTotals(){const sid=document.getElementById('stationSelect').value,st=getStation(sid),mins=Number(document.getElementById('durationSelect').value),base=st?rateFor(st.type,mins):0;let sp=0;newPlayerState.forEach((p,i)=>{const ps=data.config.snacks.reduce((a,x)=>a+Number(p.snacks[x.id]||0)*x.price,0);sp+=ps;const se=document.getElementById('psnack-'+i),te=document.getElementById('ptotal-'+i),ge=document.getElementById('pgame-'+i);if(se)se.textContent=money(ps);if(te)te.textContent=money(base+ps);if(ge)ge.textContent=money(base)});const gp=base*newPlayerState.length;document.getElementById('newGamingTotal').textContent=money(gp);document.getElementById('newSnacksTotal').textContent=money(sp);document.getElementById('newGrandTotal').textContent=money(gp+sp)}
+function startSession(){
+  captureNewPlayerInputs();const stationId=document.getElementById('stationSelect').value,durationMin=Number(document.getElementById('durationSelect').value),manualTime=document.getElementById('startTimePreview').value,startTs=manualStartTimestamp(manualTime);
+  if(newPlayerState.some((p,i)=>!p.name.trim()))return toast('Har player ka name enter karein');if(!startTs)return toast('Start time manually select karein');if(startTs>Date.now()+5*60*1000)return toast('Start time future me nahi ho sakta');if(!stationId)return toast('No free station available');if(activeForStation(stationId))return toast('Station already occupied');
+  const st=getStation(stationId),base=rateFor(st.type,durationMin);const players=newPlayerState.map((p,i)=>({id:uid(),name:p.name.trim(),phone:p.phone.trim(),gamingCharge:base,snacks:data.config.snacks.filter(x=>Number(p.snacks[x.id]||0)>0).map(x=>({id:x.id,name:x.name,price:x.price,qty:Number(p.snacks[x.id])})),paymentStatus:'Paid',paymentMode:'Cash'}));
+  const s={id:uid(),players,stationId,stationType:st.type,startTs,durationMin};syncLegacyFields(s);data.active.push(s);saveData();toast(`${stationId} • ${players.length} player session started from ${fmtTime(startTs)}`);showView('dashboard')
+}
+function renderActive(){document.getElementById('activeTable').innerHTML=data.active.length?data.active.map(s=>{const t=sessionTotals(s);return `<tr><td><b>${s.stationId}</b><div class="muted">${s.stationType}</div></td><td>${customerLabel(s)}<div class="muted">👥 ${playerCountOf(s)}${s.otherPlayers?' • '+escapeHtml(s.otherPlayers):''}${s.phone?' • '+escapeHtml(s.phone):''}</div></td><td>${fmtTime(s.startTs)}</td><td>${s.durationMin} min</td><td><b>${remainingText(s)}</b></td><td>${money(t.total)}</td><td><button class="btn primary sm" onclick="openSession('${s.id}')">Manage</button> <button class="btn red sm" onclick="openEndBill('${s.id}')">End</button></td></tr>`}).join(''):`<tr><td colspan="7" class="muted">No active sessions.</td></tr>`}
+function openSession(id,playerIdx=0){modalSessionId=id;modalPlayerIdx=Number(playerIdx)||0;const s=data.active.find(x=>x.id===id);if(!s)return;normalizeSessionPlayers(s);modalPlayerIdx=Math.max(0,Math.min(modalPlayerIdx,s.players.length-1));const p=s.players[modalPlayerIdx],pt=playerTotals(p),gt=sessionTotals(s);document.getElementById('sessionModalContent').innerHTML=`<h3>${s.stationId} • ${customerLabel(s)}</h3><p class="muted">${s.stationType} • 👥 ${playerCountOf(s)} • Started ${fmtTime(s.startTs)} • ${s.durationMin} min • Common countdown ${remainingText(s)}</p><div class="panel"><div class="section-title" style="margin-top:0">Add Time for All Players</div><div class="formgrid" style="grid-template-columns:minmax(160px,220px) auto"><div class="field"><label>Extra Time</label><select id="extraTimeSelect">${Array.from({length:12},(_,i)=>(i+1)*5).map(m=>`<option value="${m}">${m===60?'1 Hour':m+' Minutes'} • ${money(rateFor(s.stationType,m))}/player</option>`).join('')}</select></div><div style="display:flex;align-items:end"><button class="btn primary" onclick="addSelectedTime()">+ Add Selected Time</button></div></div></div><div class="panel"><div class="field"><label>Add Snacks To</label><select onchange="openSession('${s.id}',this.value)">${s.players.map((x,i)=>`<option value="${i}" ${i===modalPlayerIdx?'selected':''}>Player ${i+1} — ${escapeHtml(x.name)}</option>`).join('')}</select></div><div class="section-title">${escapeHtml(p.name)}'s Snacks</div><div class="menu">${data.config.snacks.map(x=>`<div class="snack"><div class="name">${x.name}</div><div class="price">${money(x.price)}</div><div class="qty"><button onclick="changeSessionSnack(${modalPlayerIdx},'${x.id}',-1)">−</button><span id="sq-${modalPlayerIdx}-${x.id}">${(p.snacks.find(z=>z.id===x.id)||{qty:0}).qty}</span><button onclick="changeSessionSnack(${modalPlayerIdx},'${x.id}',1)">+</button></div></div>`).join('')}</div><div class="player-totals"><div class="player-total-box"><span>${escapeHtml(p.name)} Gaming</span><b id="modalPlayerGaming">${money(pt.gaming)}</b></div><div class="player-total-box"><span>${escapeHtml(p.name)} Snacks</span><b id="modalPlayerSnacks">${money(pt.snacks)}</b></div><div class="player-total-box"><span>${escapeHtml(p.name)} Bill</span><b id="modalPlayerTotal">${money(pt.total)}</b></div></div></div><div class="summary"><div>Group Gaming</div><div id="modalGaming">${money(gt.gaming)}</div><div>Group Snacks</div><div id="modalSnacks">${money(gt.snacks)}</div><div class="grand">Group Total</div><div class="grand" id="modalTotal">${money(gt.total)}</div></div><div class="modalfooter"><button class="btn ghost" onclick="closeModal('sessionModal')">Close</button><button class="btn red" onclick="closeModal('sessionModal');openEndBill('${s.id}')">End & Separate Bills</button></div>`;document.getElementById('sessionModal').classList.add('show')}
+function addSelectedTime(){const el=document.getElementById('extraTimeSelect');if(!el)return;addTime(Number(el.value||0))}
+function addTime(min){const s=data.active.find(x=>x.id===modalSessionId);if(!s)return;normalizeSessionPlayers(s);const per=rateFor(s.stationType,min);s.durationMin+=min;s.players.forEach(p=>p.gamingCharge=Number(p.gamingCharge||0)+per);syncLegacyFields(s);saveData();openSession(s.id,modalPlayerIdx);toast(`${min} min added • ${money(per)} per player`)}
+function changeSessionSnack(playerIdx,id,d){const s=data.active.find(x=>x.id===modalSessionId);if(!s)return;normalizeSessionPlayers(s);const p=s.players[playerIdx];if(!p)return;let item=p.snacks.find(x=>x.id===id),base=data.config.snacks.find(x=>x.id===id);if(!item&&d>0){item={id:base.id,name:base.name,price:base.price,qty:0};p.snacks.push(item)}if(!item)return;item.qty=Math.max(0,item.qty+d);p.snacks=p.snacks.filter(x=>x.qty>0);syncLegacyFields(s);saveData();const el=document.getElementById(`sq-${playerIdx}-${id}`);if(el)el.textContent=(p.snacks.find(x=>x.id===id)||{qty:0}).qty;refreshSessionModal(s,playerIdx)}
+function refreshSessionModal(s,playerIdx=modalPlayerIdx){const gt=sessionTotals(s),p=s.players[playerIdx],pt=playerTotals(p);[['modalGaming',gt.gaming],['modalSnacks',gt.snacks],['modalTotal',gt.total],['modalPlayerGaming',pt.gaming],['modalPlayerSnacks',pt.snacks],['modalPlayerTotal',pt.total]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=money(v)})}
+function openEndBill(id){const s=data.active.find(x=>x.id===id);if(!s)return;modalSessionId=id;normalizeSessionPlayers(s);const gt=sessionTotals(s);document.getElementById('billModalContent').innerHTML=`<h3>Finish Session • Separate Player Bills</h3><p class="muted">${s.stationId} • ${s.stationType} • Common session ${s.durationMin} min</p>${s.players.map((p,i)=>{const t=playerTotals(p);const mode=normalizedPaymentMode(p.paymentMode,p.paymentStatus);return `<div class="bill-player"><div class="player-bill-grid"><div><b>Player ${i+1}: ${escapeHtml(p.name)}</b>${p.phone?`<div class="muted">${escapeHtml(p.phone)}</div>`:''}<div class="muted">Gaming ${money(t.gaming)} + Snacks ${money(t.snacks)} = <b>${money(t.total)}</b></div></div><div class="field"><label>Payment Type</label><select id="payMode-${i}"><option value="Cash" ${mode==='Cash'?'selected':''}>Cash</option><option value="Online" ${mode==='Online'?'selected':''}>Online</option><option value="Udhar" ${mode==='Udhar'?'selected':''}>Udhar</option></select></div><div><b>${money(t.total)}</b></div></div></div>`}).join('')}<div class="summary" style="margin-top:16px"><div>Group Gaming</div><div>${money(gt.gaming)}</div><div>Group Snacks</div><div>${money(gt.snacks)}</div><div class="grand">Group Total</div><div class="grand">${money(gt.total)}</div></div><div class="hint" style="margin-top:12px">Online = UPI/Card payment. Udhar select karne par amount automatically Udhar section me add hoga. Jama baad me Jama section se record karein.</div><div class="modalfooter"><button class="btn ghost" onclick="closeModal('billModal')">Cancel</button><button class="btn green" onclick="finishSession()">Complete & Show Player Bills</button></div>`;document.getElementById('billModal').classList.add('show')}
+function normalizedPaymentMode(mode,status){if(status==='Pending'||mode==='Udhar')return 'Udhar';if(['Online','UPI','Card'].includes(mode))return 'Online';return 'Cash'}
+function finishSession(){
+  const s=data.active.find(x=>x.id===modalSessionId);if(!s)return;normalizeSessionPlayers(s);
+  s.players.forEach((p,i)=>{const mode=document.getElementById(`payMode-${i}`).value;p.paymentMode=mode;p.paymentStatus=mode==='Udhar'?'Pending':'Paid'});
+  const rec=JSON.parse(JSON.stringify(s));rec.endTs=Date.now();syncLegacyFields(rec);data.history.push(rec);
+  rec.players.forEach(p=>{if(p.paymentStatus==='Pending'){const t=playerTotals(p);data.ledger.push({id:uid(),ts:rec.endTs,date:dateKey(rec.endTs),name:p.name,phone:p.phone||'',type:'Udhar',amount:t.total,note:`Pending bill • ${rec.stationId} • ${rec.durationMin} min`,sourceSessionId:rec.id,sourcePlayerId:p.id})}});
+  allSessionSnacks(s).forEach(x=>{data.inventorySold[x.id]=(data.inventorySold[x.id]||0)+x.qty;const cfg=data.config.snacks.find(z=>z.id===x.id);if(cfg&&cfg.stock>0)cfg.stock=Math.max(0,cfg.stock-x.qty)});
+  data.active=data.active.filter(x=>x.id!==s.id);saveData();showReceiptChooser(rec);renderDashboard();renderActive();
+}
+function showReceiptChooser(rec){const gt=sessionTotals(rec);document.getElementById('billModalContent').innerHTML=`<h3>Player-wise Bills Ready</h3><p class="muted">${rec.stationId} • ${fmtDate(rec.endTs)} ${fmtTime(rec.endTs)}</p>${rec.players.map((p,i)=>{const t=playerTotals(p);return `<div class="bill-player"><div class="row"><div><b>${escapeHtml(p.name)}</b><div class="muted">${p.paymentStatus} • ${p.paymentMode}</div></div><div style="text-align:right"><b>${money(t.total)}</b><div><button class="btn primary sm" onclick="showPlayerReceipt('${rec.id}',${i})">View / Print Bill</button></div></div></div></div>`}).join('')}<div class="summary" style="margin-top:16px"><div class="grand">Group Total</div><div class="grand">${money(gt.total)}</div></div><div class="modalfooter"><button class="btn ghost" onclick="closeModal('billModal')">Close</button></div>`;document.getElementById('billModal').classList.add('show')}
+function showPlayerReceipt(id,idx){const rec=data.history.find(x=>x.id===id);if(!rec)return;normalizeSessionPlayers(rec);document.getElementById('billModalContent').innerHTML=receiptHtml(rec,idx)+`<div class="modalfooter"><button class="btn ghost" onclick="showReceiptChooser(data.history.find(x=>x.id==='${id}'))">← All Player Bills</button><button class="btn primary" onclick="window.print()">Print This Bill</button></div>`}
+function receiptHtml(rec,idx=0){normalizeSessionPlayers(rec);const cafe=data.config.cafe,p=rec.players[Math.max(0,Math.min(Number(idx)||0,rec.players.length-1))],t=playerTotals(p);return `<div class="receipt"><h2>${escapeHtml(cafe.name||'GAME ZONE')}</h2><div class="center">${escapeHtml(cafe.address||'')} ${cafe.phone?'<br>'+escapeHtml(cafe.phone):''}</div><hr><table><tr><td>Date</td><td class="right">${fmtDate(rec.endTs)} ${fmtTime(rec.endTs)}</td></tr><tr><td>Player</td><td class="right">${escapeHtml(p.name)}</td></tr>${p.phone?`<tr><td>Mobile</td><td class="right">${escapeHtml(p.phone)}</td></tr>`:''}<tr><td>Station</td><td class="right">${rec.stationId}</td></tr><tr><td>Start Time</td><td class="right">${fmtTime(rec.startTs)}</td></tr><tr><td>Session</td><td class="right">${rec.durationMin} min</td></tr></table><hr><table><tr><td>Gaming</td><td class="right">${money(t.gaming)}</td></tr>${(p.snacks||[]).map(x=>`<tr><td>${escapeHtml(x.name)} × ${x.qty}</td><td class="right">${money(x.price*x.qty)}</td></tr>`).join('')}</table><hr><table><tr><td><b>PLAYER TOTAL</b></td><td class="right"><b>${money(t.total)}</b></td></tr><tr><td>Payment</td><td class="right">${p.paymentStatus} • ${p.paymentMode}</td></tr></table><hr><div class="center">Thank you for visiting! 🎮</div></div>`}
+function renderHistory(){document.getElementById('historyTable').innerHTML=data.history.length?[...data.history].reverse().map(x=>{normalizeSessionPlayers(x);return `<tr><td>${fmtDate(x.endTs)}<div class="muted">${fmtTime(x.endTs)}</div></td><td>${customerLabel(x)}<div class="muted">👥 ${playerCountOf(x)} • separate bills</div></td><td>${x.stationId}</td><td>${money(x.gamingTotal)}</td><td>${money(x.snacksTotal)}</td><td><b>${money(x.total)}</b></td><td>${x.paymentStatus}</td><td>${x.paymentMode}</td><td><button class="btn ghost sm" onclick="reprint('${x.id}')">View Bills</button></td></tr>`}).join(''):`<tr><td colspan="9" class="muted">No completed sessions yet.</td></tr>`}
+function reprint(id){const r=data.history.find(x=>x.id===id);if(!r)return;showReceiptChooser(r)}
+function renderReports(){const input=document.getElementById('reportDate');if(!input.value)input.value=dateKey(Date.now());const rows=data.history.filter(x=>dateKey(x.endTs)===input.value);rows.forEach(normalizeSessionPlayers);const total=rows.reduce((a,x)=>a+sessionTotals(x).total,0),gaming=rows.reduce((a,x)=>a+sessionTotals(x).gaming,0),snacks=rows.reduce((a,x)=>a+sessionTotals(x).snacks,0),online=onlinePaymentEntries().filter(x=>x.date===input.value).reduce((a,x)=>a+x.amount,0),udhar=(data.ledger||[]).filter(x=>x.type==='Udhar'&&entryDateKey(x)===input.value).reduce((a,x)=>a+Number(x.amount||0),0),jama=(data.ledger||[]).filter(x=>x.type==='Jama'&&entryDateKey(x)===input.value).reduce((a,x)=>a+Number(x.amount||0),0);document.getElementById('reportStats').innerHTML=[['Sessions',rows.length,'completed'],['Gaming Revenue',money(gaming),'selected date'],['Snack Revenue',money(snacks),'selected date'],['Total Sales',money(total),'gross'],['Online',money(online),'received'],['Udhar',money(udhar),'credit'],['Jama',money(jama),'recovery']].map(([l,v,s])=>`<div class="stat"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`).join('');const types=['PS5','PS4','Xbox 360','Sim Racing'];document.getElementById('consoleReport').innerHTML=types.map(type=>{const r=rows.filter(x=>x.stationType===type);return `<tr><td>${type}</td><td>${r.length}</td><td>${money(r.reduce((a,x)=>a+sessionTotals(x).gaming,0))}</td></tr>`}).join('');document.getElementById('snackReport').innerHTML=data.config.snacks.map(sn=>{let q=0,rev=0;rows.forEach(r=>allSessionSnacks(r).forEach(x=>{if(x.id===sn.id){q+=x.qty;rev+=x.qty*x.price}}));return `<tr><td>${sn.name}</td><td>${q}</td><td>${money(rev)}</td></tr>`}).join('')}
+function renderInventory(){document.getElementById('inventoryTable').innerHTML=data.config.snacks.map(x=>`<tr><td>${x.name}</td><td>${money(x.price)}</td><td><input id="stock-${x.id}" type="number" min="0" value="${x.stock||0}" style="width:100px;padding:8px;border-radius:8px;border:1px solid #344057;background:#0d1527;color:#fff"></td><td>${data.inventorySold[x.id]||0}</td><td>${(x.stock||0)<=5?'<span class="badge warning">LOW</span>':'OK'}</td></tr>`).join('')}
+function saveInventory(){data.config.snacks.forEach(x=>{x.stock=Math.max(0,Number(document.getElementById('stock-'+x.id).value||0))});saveData();toast('Stock saved');renderInventory()}
+function ledgerKey(e){const phone=String(e.phone||'').replace(/\D/g,'');return phone?`p:${phone}`:`n:${String(e.name||'').trim().toLowerCase()}`}
+function ledgerGroups(){
+  const map=new Map();
+  (data.ledger||[]).forEach(e=>{const k=ledgerKey(e);if(!k)return;const g=map.get(k)||{name:e.name||'Customer',phone:e.phone||'',udhar:0,jama:0};if(e.name)g.name=e.name;if(e.phone)g.phone=e.phone;if(e.type==='Jama')g.jama+=Number(e.amount||0);else g.udhar+=Number(e.amount||0);map.set(k,g)});
+  return [...map.values()].map(g=>({...g,balance:g.udhar-g.jama})).sort((a,b)=>b.balance-a.balance);
+}
+function entryDateKey(e){return e?.date||dateKey(e?.ts||Date.now())}
+function isOnlineMode(mode){return ['Online','UPI','Card'].includes(String(mode||''))}
+function onlinePaymentEntries(){
+  const out=[];
+  data.history.forEach(rec=>{normalizeSessionPlayers(rec);rec.players.forEach((p,idx)=>{if(p.paymentStatus==='Paid'&&isOnlineMode(p.paymentMode)){const t=playerTotals(p);out.push({date:dateKey(rec.endTs),ts:rec.endTs,recId:rec.id,playerIdx:idx,name:p.name,phone:p.phone||'',station:rec.stationId,mode:p.paymentMode||'Online',amount:t.total})}})});
+  return out.sort((a,b)=>b.ts-a.ts);
+}
+function renderOnline(){
+  const rows=onlinePaymentEntries(),today=dateKey(Date.now()),todayRows=rows.filter(x=>x.date===today),todayTotal=todayRows.reduce((a,x)=>a+x.amount,0),allTotal=rows.reduce((a,x)=>a+x.amount,0);
+  document.getElementById('onlineStats').innerHTML=[['Online Today',money(todayTotal),'UPI / Card / Online'],['Today Transactions',todayRows.length,'player bills'],['All Online',money(allTotal),'saved history'],['Transactions',rows.length,'all time']].map(([l,v,sub])=>`<div class="stat"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${sub}</div></div>`).join('');
+  document.getElementById('onlineHistoryTable').innerHTML=rows.length?rows.map(x=>`<tr><td>${fmtDate(x.ts)}<div class="muted">${fmtTime(x.ts)}</div></td><td><b>${escapeHtml(x.name)}</b></td><td>${escapeHtml(x.phone||'—')}</td><td>${x.station}</td><td><span class="badge busy">${escapeHtml(x.mode)}</span></td><td><b>${money(x.amount)}</b></td><td><button class="btn ghost sm" onclick="showPlayerReceipt('${x.recId}',${x.playerIdx})">View Bill</button></td></tr>`).join(''):`<tr><td colspan="7" class="muted">No online payments yet.</td></tr>`;
+}
+function renderUdhar(){
+  data.ledger=Array.isArray(data.ledger)?data.ledger:[];const dateEl=document.getElementById('udharDate');if(dateEl&&!dateEl.value)dateEl.value=dateKey(Date.now());
+  const rows=data.ledger.filter(x=>x.type==='Udhar').sort((a,b)=>Number(b.ts||0)-Number(a.ts||0)),today=dateKey(Date.now()),todayTotal=rows.filter(x=>entryDateKey(x)===today).reduce((a,x)=>a+Number(x.amount||0),0),allTotal=rows.reduce((a,x)=>a+Number(x.amount||0),0),groups=ledgerGroups(),outstanding=groups.reduce((a,g)=>a+Math.max(0,g.balance),0),dueCustomers=groups.filter(g=>g.balance>0);
+  document.getElementById('udharStats').innerHTML=[['Udhar Today',money(todayTotal),'new credit today'],['Total Udhar',money(allTotal),'all entries'],['Outstanding',money(outstanding),'abhi lena hai'],['Due Customers',dueCustomers.length,'positive balance']].map(([l,v,sub])=>`<div class="stat"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${sub}</div></div>`).join('');
+  document.getElementById('udharBalanceTable').innerHTML=dueCustomers.length?dueCustomers.map(g=>`<tr><td><b>${escapeHtml(g.name)}</b></td><td>${escapeHtml(g.phone||'—')}</td><td>${money(g.udhar)}</td><td>${money(g.jama)}</td><td><b>${money(g.balance)}</b></td></tr>`).join(''):`<tr><td colspan="5" class="muted">Kisi customer ka outstanding Udhar nahi hai.</td></tr>`;
+  document.getElementById('udharHistoryTable').innerHTML=rows.length?rows.map(e=>`<tr><td>${fmtDate(e.ts||Date.now())}<div class="muted">${e.ts?fmtTime(e.ts):''}</div></td><td><b>${escapeHtml(e.name)}</b></td><td>${escapeHtml(e.phone||'—')}</td><td><b>${money(e.amount)}</b></td><td>${escapeHtml(e.note||'—')}</td><td><button class="btn red sm" onclick="deleteLedgerEntry('${e.id}')">Delete</button></td></tr>`).join(''):`<tr><td colspan="6" class="muted">No Udhar entries yet.</td></tr>`;
+}
+function renderJama(){
+  data.ledger=Array.isArray(data.ledger)?data.ledger:[];const dateEl=document.getElementById('jamaDate');if(dateEl&&!dateEl.value)dateEl.value=dateKey(Date.now());
+  const rows=data.ledger.filter(x=>x.type==='Jama').sort((a,b)=>Number(b.ts||0)-Number(a.ts||0)),today=dateKey(Date.now()),todayTotal=rows.filter(x=>entryDateKey(x)===today).reduce((a,x)=>a+Number(x.amount||0),0),allTotal=rows.reduce((a,x)=>a+Number(x.amount||0),0),groups=ledgerGroups(),outstanding=groups.reduce((a,g)=>a+Math.max(0,g.balance),0),advance=groups.reduce((a,g)=>a+Math.max(0,-g.balance),0);
+  document.getElementById('jamaStats').innerHTML=[['Jama Today',money(todayTotal),'received today'],['Total Jama',money(allTotal),'all recovery'],['Outstanding Left',money(outstanding),'abhi lena hai'],['Advance',money(advance),'extra jama']].map(([l,v,sub])=>`<div class="stat"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${sub}</div></div>`).join('');
+  document.getElementById('jamaBalanceTable').innerHTML=groups.length?groups.map(g=>`<tr><td><b>${escapeHtml(g.name)}</b></td><td>${escapeHtml(g.phone||'—')}</td><td>${money(g.udhar)}</td><td>${money(g.jama)}</td><td><b>${g.balance>0?money(g.balance):g.balance<0?'Advance '+money(Math.abs(g.balance)):money(0)}</b></td></tr>`).join(''):`<tr><td colspan="5" class="muted">No customer ledger yet.</td></tr>`;
+  document.getElementById('jamaHistoryTable').innerHTML=rows.length?rows.map(e=>`<tr><td>${fmtDate(e.ts||Date.now())}<div class="muted">${e.ts?fmtTime(e.ts):''}</div></td><td><b>${escapeHtml(e.name)}</b></td><td>${escapeHtml(e.phone||'—')}</td><td><b>${money(e.amount)}</b></td><td>${escapeHtml(e.note||'—')}</td><td><button class="btn red sm" onclick="deleteLedgerEntry('${e.id}')">Delete</button></td></tr>`).join(''):`<tr><td colspan="6" class="muted">No Jama entries yet.</td></tr>`;
+}
+function addLedgerEntry(type){
+  const prefix=type==='Jama'?'jama':'udhar',name=document.getElementById(prefix+'Name').value.trim(),phone=document.getElementById(prefix+'Phone').value.trim(),amount=Math.round(Number(document.getElementById(prefix+'Amount').value||0)),date=document.getElementById(prefix+'Date').value||dateKey(Date.now()),note=document.getElementById(prefix+'Note').value.trim();
+  if(!name)return toast('Customer name enter karein');if(!(amount>0))return toast('Valid amount enter karein');
+  const [y,m,d]=date.split('-').map(Number);const now=new Date();const ts=new Date(y,m-1,d,now.getHours(),now.getMinutes(),0,0).getTime();
+  data.ledger.push({id:uid(),ts,date,name,phone,type,amount,note});saveData();document.getElementById(prefix+'Amount').value='';document.getElementById(prefix+'Note').value='';toast(`${type} ${money(amount)} saved`);type==='Jama'?renderJama():renderUdhar();renderDashboard();
+}
+function deleteLedgerEntry(id){if(!confirm('Ye entry delete karni hai?'))return;data.ledger=data.ledger.filter(x=>x.id!==id);saveData();if(document.getElementById('view-udhar').classList.contains('active'))renderUdhar();if(document.getElementById('view-jama').classList.contains('active'))renderJama();renderDashboard();toast('Entry deleted')}
+function exportLedgerCSV(type){const head=['Date','Customer','Phone','Type','Amount','Note'];const rows=[...(data.ledger||[])].filter(e=>!type||e.type===type).map(e=>[e.date||dateKey(e.ts),e.name,e.phone||'',e.type,e.amount,e.note||'']);const csv=[head,...rows].map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n');downloadBlob(csv,`game-zone-${(type||'ledger').toLowerCase()}.csv`,'text/csv')}
+function exportOnlineCSV(){const head=['Date','Customer','Phone','Station','Mode','Amount'];const rows=onlinePaymentEntries().map(e=>[e.date,e.name,e.phone,e.station,e.mode,e.amount]);const csv=[head,...rows].map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n');downloadBlob(csv,'game-zone-online-payments.csv','text/csv')}
+function renderSettings(){document.getElementById('rateTable').innerHTML=Object.keys(data.config.rates).map(k=>`<tr><td>${k}</td><td>${money(rateFor(k,5))}</td><td>${money(rateFor(k,15))}</td><td>${money(rateFor(k,30))}</td><td>${money(rateFor(k,45))}</td><td>${money(rateFor(k,60))}</td></tr>`).join('');document.getElementById('cafeName').value=data.config.cafe.name||'';document.getElementById('cafePhone').value=data.config.cafe.phone||'';document.getElementById('cafeAddress').value=data.config.cafe.address||''}
+function saveCafeSettings(){data.config.cafe={name:document.getElementById('cafeName').value.trim()||'GAME ZONE',phone:document.getElementById('cafePhone').value.trim(),address:document.getElementById('cafeAddress').value.trim()};saveData();toast('Cafe details saved')}
+function exportCSV(){const head=['Date','SessionID','Player','Phone','Station','Type','Start','End','DurationMin','Gaming','Snacks','PlayerTotal','PaymentStatus','PaymentMode'];const rows=[];data.history.forEach(x=>{normalizeSessionPlayers(x);x.players.forEach(p=>{const t=playerTotals(p);rows.push([fmtDate(x.endTs),x.id,p.name,p.phone||'',x.stationId,x.stationType,fmtTime(x.startTs),fmtTime(x.endTs),x.durationMin,t.gaming,t.snacks,t.total,p.paymentStatus,p.paymentMode])})});const csv=[head,...rows].map(r=>r.map(v=>'\"'+String(v).replaceAll('\"','\"\"')+'\"').join(',')).join('\n');downloadBlob(csv,'game-zone-player-bills.csv','text/csv')}
+function backupData(){downloadBlob(JSON.stringify(data,null,2),'game-zone-backup.json','application/json')}
+function restoreData(e){const f=e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const obj=JSON.parse(reader.result);if(!obj.config||!obj.active||!obj.history)throw new Error();data=migrateData(obj);saveData();toast('Backup restored');showView('dashboard')}catch{toast('Invalid backup file')}};reader.readAsText(f);e.target.value=''}
+function resetAll(){if(!confirm('All sessions, history, Online records, Udhar/Jama ledger aur stock reset karna hai?'))return;data={config:structuredClone(DEFAULT_CONFIG),active:[],history:[],inventorySold:{},ledger:[]};saveData();toast('All data reset');showView('dashboard')}
+function downloadBlob(content,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function escapeHtml(s){return String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+document.getElementById('durationSelect').addEventListener('change',()=>{captureNewPlayerInputs();renderPlayerSections();updateNewPrice()});document.getElementById('stationSelect').addEventListener('change',()=>{captureNewPlayerInputs();renderPlayerSections();updateNewPrice()});document.getElementById('playerCount').addEventListener('change',resizeNewPlayers);
+document.querySelectorAll('.modalback').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show')}));
+setInterval(()=>{renderDashboard();if(document.getElementById('view-active').classList.contains('active'))renderActive()},1000);
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+renderDashboard();
+</script>
+</body>
+</html>
